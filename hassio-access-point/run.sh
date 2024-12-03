@@ -203,11 +203,16 @@ fi
 
 # Setup Client Internet Access
 if $(bashio::config.true "client_internet_access"); then
-
     ## Route traffic
-    iptables-nft -t nat -A POSTROUTING -o $DEFAULT_ROUTE_INTERFACE -j MASQUERADE
+    iptables-nft -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
+    iptables-nft -P FORWARD ACCEPT
+    #iptables-nft -A FORWARD -m iprange --dst-range 192.168.178.2-192.168.178.254 -j DROP
+    iptables-nft -F FORWARD
+    iptables-nft -A FORWARD -s 192.168.2.0/24 -d 192.168.178.0/24 -j DROP
+else
     iptables-nft -P FORWARD ACCEPT
     iptables-nft -F FORWARD
+    iptables-nft -A FORWARD -s 192.168.2.0/24 -j DROP
 fi
 
 # Start dnsmasq if DHCP is enabled in config
